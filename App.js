@@ -1,29 +1,38 @@
 
 import React, {useState} from 'react';
-import { StyleSheet, Text, View, Button,TextInput,ScrollView, FlatList} from 'react-native';
+import { StyleSheet, View, Button, FlatList} from 'react-native';
+
+import GoalItem from './components/GoalItem';
+import GoalInput from './components/GoalInput';
 
 export default function App() {
   
-  const [enteredGoal, setEnteredGoal]=useState('');
+ 
   const [courseGoals, setCourseGoals]=useState([]);
-  
-  
-  const goalInputHandler = (enteredText) => {
-    setEnteredGoal(enteredText)
+  const [isAddMode, setIsAddMode]=useState(false);
+    
+  const addGoalHandler = goalTitle => {
+    setCourseGoals(currentGoals=>[...currentGoals, {uid:Math.random().toString(),value:goalTitle}]);
+    setIsAddMode(false);
   };
-  
-  const addGoalHandler = () => {
-    setCourseGoals(currentGoals=>[...currentGoals, {uid:Math.random().toString(),value:enteredGoal}]);
-  }
+
+  const removeGoalHandler=goalId=>{
+    setCourseGoals(currentGoals=>{
+      return currentGoals.filter((goal)=>goal.uid !== goalId);
+    })
+  };
+
+  const cancelGoalAdditionalHandler=()=>{
+    setIsAddMode(false);
+  };
+
   return (
     
       <View style={styles.screen}>
-        <View style={styles.inputContainer}>
-          <TextInput onChangeText={goalInputHandler} style={styles.input} placeholder='Course Goal' />
-          <Button title='ADD' onPress={addGoalHandler}/>
-        </View>
-        <FlatList keyExtractor={(item, index)=>item.uid} data={courseGoals} renderItem={itemData=>(<View style={styles.goal}><Text>{itemData.item.value}</Text></View>)}/>
-    </View>
+        <Button title={"Add New Goal"} onPress={()=>setIsAddMode(true)}/>
+        <GoalInput onCancel={cancelGoalAdditionalHandler} visible={isAddMode} onAddGoal={addGoalHandler}/>
+        <FlatList keyExtractor={(item, index)=>item.uid} data={courseGoals} renderItem={itemData=><GoalItem onDelete={removeGoalHandler.bind(this, itemData.item.uid)} title={itemData.item.value}/>}/>
+    </View> 
     
   );
 }
@@ -32,20 +41,8 @@ const styles = StyleSheet.create({
  screen:{
   padding:50
  },
- inputContainer:{
-  flexDirection:'row', 
-  justifyContent:'space-between', 
-  alignItems:'center'
- },
- input:{
-  borderColor:'black', borderWidth:1, padding:10, width:'80%'
- },
- goal:{
-   padding:5,
-   backgroundColor:'#ccc',
-   borderColor:'black',
-   marginVertical:4,
-   borderWidth:1
- }
+
+
+ 
 
 });
